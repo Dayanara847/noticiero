@@ -1,5 +1,6 @@
 package com.henry.noticiero.controller;
 
+import com.henry.noticiero.converter.WriterToWriterDTOConvert;
 import com.henry.noticiero.model.Writer;
 import com.henry.noticiero.model.dto.WriterDTO;
 import com.henry.noticiero.service.WriterService;
@@ -20,6 +21,9 @@ public class WriterController {
     @Autowired
     private ConversionService conversionService;
 
+    @Autowired
+    private WriterToWriterDTOConvert writerToWriterDTOConvert;
+
  /*   @GetMapping("/{id}")
     public Writer getWriter(@PathVariable Integer id) {
         return writerService.getWriter(id);
@@ -31,8 +35,8 @@ public class WriterController {
     }
 
     @GetMapping
-    public List<Writer> getAllWriter() {
-        return writerService.getAllWriter();
+    public List<WriterDTO> getAllWriter() {
+        return conversionService.convert(writerService.getAllWriter(), List.class);
     }
 
     @PostMapping
