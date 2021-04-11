@@ -2,18 +2,20 @@ package com.henry.noticiero.service;
 
 import com.henry.noticiero.model.Noticia;
 import com.henry.noticiero.model.Writer;
+import com.henry.noticiero.model.dto.WriterDTO;
 import com.henry.noticiero.repository.WriterRepository;
 import com.henry.noticiero.utils.EntityURLBuilder;
 import com.henry.noticiero.utils.PostResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
 
 @Service
 public class WriterService {
 
-    //@Autowired --> Creamos el constructor, es como poner un Autowired a cada una de las líneas que están abajo: 15 y 16
     private static final String WRITER_PATH = "writer";
     private WriterRepository writerRepository;
     private NoticiaService noticiaService;
@@ -33,8 +35,20 @@ public class WriterService {
                 .build();
     }
 
+ /*   public Writer getWriter(Integer id) {
+        return writerRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    }*/
+
     public Writer getWriter(Integer id) {
-        return writerRepository.findById(id).orElseThrow(() -> new HttpClientErrorException(HttpStatus.NOT_FOUND));
+        return writerRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    }
+
+    public List<Writer> getAllWriter() {
+        List<Writer> writersList = writerRepository.findAll();
+        if(writersList.size() == 0) {
+            throw new ResponseStatusException(HttpStatus.NO_CONTENT);
+        }
+        return writersList;
     }
 
     public void addNoticia(Integer id, Integer noticiaID) {
@@ -42,7 +56,6 @@ public class WriterService {
         Noticia noticia = noticiaService.findNoticiaById(noticiaID);
 
         noticia.setWriter(writer);
-        //writer.getNoticiaList().add(noticia);
         writerRepository.save(writer);
     }
 

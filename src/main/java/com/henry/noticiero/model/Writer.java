@@ -5,7 +5,6 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-//import java.util.List;
 
 @Entity
 @Data
@@ -16,14 +15,10 @@ public class Writer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     @NotNull
+    private String dni;
+    @NotNull
     private String firstName;
     @NotNull
     private String lastName;
-
-    private String avatarChuck;
-
-    //@OneToMany(fetch = FetchType.EAGER)
-    //@JoinColumn(name = "noticia_id")
-    //private List<Noticia> noticiaList;
 
 }

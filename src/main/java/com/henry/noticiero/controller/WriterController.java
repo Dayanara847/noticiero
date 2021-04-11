@@ -1,9 +1,14 @@
 package com.henry.noticiero.controller;
 
 import com.henry.noticiero.model.Writer;
+import com.henry.noticiero.model.dto.WriterDTO;
 import com.henry.noticiero.service.WriterService;
+import com.henry.noticiero.utils.PostResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/writer")
@@ -12,14 +17,27 @@ public class WriterController {
     @Autowired
     private WriterService writerService;
 
-    @GetMapping("/{id}")
+    @Autowired
+    private ConversionService conversionService;
+
+ /*   @GetMapping("/{id}")
     public Writer getWriter(@PathVariable Integer id) {
         return writerService.getWriter(id);
+    }*/
+
+    @GetMapping("/{id}")
+    public WriterDTO getWriter(@PathVariable Integer id) {
+        return conversionService.convert(writerService.getWriter(id), WriterDTO.class);
+    }
+
+    @GetMapping
+    public List<Writer> getAllWriter() {
+        return writerService.getAllWriter();
     }
 
     @PostMapping
-    public void addWriter(@RequestBody Writer writer) {
-        writerService.addWriter(writer);
+    public PostResponse addWriter(@RequestBody Writer writer) {
+        return writerService.addWriter(writer);
     }
 
     @PutMapping("/{id}/noticias/{noticiaID}")

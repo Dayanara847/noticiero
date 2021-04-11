@@ -1,103 +1,80 @@
 package com.henry.noticiero.service;
 
 import com.google.gson.Gson;
-import com.henry.noticiero.model.response.ChuckNorrisResponse;
+import com.henry.noticiero.model.response.Day;
+import com.henry.noticiero.model.response.WeatherMeteoredAPIResponse;
+import com.henry.noticiero.model.response.WeatherOpenAPIResponse;
+import com.henry.noticiero.model.response.WeatherResponse;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomUtils;
-import org.springframework.scheduling.annotation.Async;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 
 @Service
 @Slf4j
 public class ApiCallService {
 
     private static final HttpClient client = HttpClient.newBuilder().version(HttpClient.Version.HTTP_2).build();
-    private static final String URL = "http://webcode.me";
+    private static final String API_KEY = "10a2833db7bfe71cbbcc08efc8124882";
+    private static final String URL = "https://api.openweathermap.org/data/2.5/weather?q=montevideo&units=metric&appid=" + API_KEY;
+    private static final String URL2 = "http://api.meteored.cl/index.php?api_lang=en&localidad=13027&affiliate_id=4y4r2dl4bvxv&v=3.0";
 
-    @CircuitBreaker(name = "ChuckNorris", fallbackMethod = "fallback")
-    public ChuckNorrisResponse callAPI() throws IOException, InterruptedException {
-
+    @CircuitBreaker(name = "weather", fallbackMethod = "fallback")
+    public WeatherResponse callAPI() throws IOException, InterruptedException {
 
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("https://matchilling-chuck-norris-jokes-v1.p.rapidapi.com/jokes/random"))
-                .header("accept", "application/json")
-                .header("x-rapidapi-key", "be3e242d52msh019478af3718bf5p1c359cjsnaa0936525cfb")
-                .header("x-rapidapi-host", "matchilling-chuck-norris-jokes-v1.p.rapidapi.com")
+                .uri(URI.create(URL))
                 .method("GET", HttpRequest.BodyPublishers.noBody())
                 .build();
-
         HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
 
+        final WeatherOpenAPIResponse weatherResponse = new Gson().fromJson(response.body(), WeatherOpenAPIResponse.class);
 
-        final ChuckNorrisResponse chuckNorrisResponse = new Gson().fromJson(response.body(), ChuckNorrisResponse.class);
+        Double tempMax = weatherResponse.getMainResponse().getTemp_max();
+        Double tempMin = weatherResponse.getMainResponse().getTemp_min();
+        Double temp = weatherResponse.getMainResponse().getTemp();
+        String status = weatherResponse.getWeather()[0].getMain();
 
-        System.out.println(chuckNorrisResponse);
+        WeatherResponse weatherFinalResponse = new WeatherResponse(status, temp, tempMax, tempMin);
 
-        if (RandomUtils.nextBoolean()) {
-            throw new IOException("Probando Circuit Breaker");
-        }
-
-        return chuckNorrisResponse;
+        /*if (RandomUtils.nextBoolean()) {
+            throw new IOException("Probando el @CircuitBreaker");
+        }*/
+        return weatherFinalResponse;
     }
 
-    public List<ChuckNorrisResponse> callListAPI() throws IOException, InterruptedException, CompletionException {
-        List<ChuckNorrisResponse> norrisResponses = new ArrayList<>();
-
-        CompletableFuture<HttpResponse<String>> chuck1 = chuckNorrisAsync();
-        CompletableFuture<HttpResponse<String>> chuck2 = chuckNorrisAsync();
-
-        final ChuckNorrisResponse chuckNorrisResponse1 = new Gson().fromJson(chuck1.join().body(), ChuckNorrisResponse.class);
-        final ChuckNorrisResponse chuckNorrisResponse2 = new Gson().fromJson(chuck2.join().body(), ChuckNorrisResponse.class);
-
-        norrisResponses.add(chuckNorrisResponse1);
-        norrisResponses.add(chuckNorrisResponse2);
-
-        return norrisResponses;
-    }
-
-    private ChuckNorrisResponse fallback(final Throwable t) {
-        log.error(t.getStackTrace().toString());
-        return ChuckNorrisResponse
-                .builder()
-                .id("asd")
-                .iconUrl("someurl")
-                .url("someurl")
-                .value("someValue")
-                .updated("updated")
-                .categories(new HashMap<>())
-                .build();
-    }
-
-    private CompletableFuture<ChuckNorrisResponse> fallbackAsync(final Throwable t) {
-        log.error(t.getStackTrace().toString());
-        return CompletableFuture.supplyAsync(() -> fallback(t));
-    }
-
-    @Async("taskExecutor")
-    @CircuitBreaker(name = "ChuckNorris", fallbackMethod = "fallbackAsync")
-    public CompletableFuture<HttpResponse<String>> chuckNorrisAsync() throws IllegalArgumentException {
-
+    private WeatherResponse fallback(final Throwable t) {
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("https://matchilling-chuck-norris-jokes-v1.p.rapidapi.com/jokes/random"))
-                .header("accept", "application/json")
-                .header("x-rapidapi-key", "be3e242d52msh019478af3718bf5p1c359cjsnaa0936525cfb")
-                .header("x-rapidapi-host", "matchilling-chuck-norris-jokes-v1.p.rapidapi.com")
+                .uri(URI.create(URL2))
                 .method("GET", HttpRequest.BodyPublishers.noBody())
                 .build();
 
-        return HttpClient.newHttpClient().sendAsync(request, HttpResponse.BodyHandlers.ofString());
+        try {
+            HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
 
+            final WeatherMeteoredAPIResponse meteoredResponse = new Gson().fromJson(response.body(), WeatherMeteoredAPIResponse.class);
+
+            Day day = meteoredResponse.getDay().get("1");
+
+            return WeatherResponse
+                    .builder()
+                    .status(day.getStatus())
+                    .temp(day.getHour()[4].getTemp())
+                    .tempMin(day.getTempMin())
+                    .tempMax(day.getTempMax())
+                    .build();
+
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Esta información no está disponible por el momento.");
+        }
     }
+
 }

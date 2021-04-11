@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.NotFound;
 import org.springframework.data.annotation.AccessType;
 
 import javax.persistence.*;
@@ -19,7 +18,7 @@ import javax.validation.constraints.NotNull;
         @JsonSubTypes.Type(value = Text.class, name = "TEXT")
 })
 @Entity
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+//@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 public abstract class Noticia {
 
     @Id
