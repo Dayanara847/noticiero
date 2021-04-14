@@ -45,7 +45,8 @@ public class ApiCallService {
 
         WeatherResponse weatherFinalResponse = new WeatherResponse(status, temp, tempMax, tempMin);
 
-        /*if (RandomUtils.nextBoolean()) {
+        /* Para probar el Fallback:
+        if (RandomUtils.nextBoolean()) {
             throw new IOException("Probando el @CircuitBreaker");
         }*/
         return weatherFinalResponse;

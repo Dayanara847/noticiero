@@ -8,8 +8,10 @@ import lombok.Data;
 @AllArgsConstructor
 @Builder
 public class WeatherResponse {
+
     private String status;
     private Double temp;
     private Double tempMax;
     private Double tempMin;
+
 }

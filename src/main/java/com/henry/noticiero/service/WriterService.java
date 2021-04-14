@@ -2,7 +2,6 @@ package com.henry.noticiero.service;
 
 import com.henry.noticiero.model.Noticia;
 import com.henry.noticiero.model.Writer;
-import com.henry.noticiero.model.dto.WriterDTO;
 import com.henry.noticiero.repository.WriterRepository;
 import com.henry.noticiero.utils.EntityURLBuilder;
 import com.henry.noticiero.utils.PostResponse;
@@ -34,10 +33,6 @@ public class WriterService {
                 .url(EntityURLBuilder.buildURL(WRITER_PATH, writerSaved.getId().toString()))
                 .build();
     }
-
- /*   public Writer getWriter(Integer id) {
-        return writerRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-    }*/
 
     public Writer getWriter(Integer id) {
         return writerRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));

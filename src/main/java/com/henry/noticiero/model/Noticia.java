@@ -18,7 +18,6 @@ import javax.validation.constraints.NotNull;
         @JsonSubTypes.Type(value = Text.class, name = "TEXT")
 })
 @Entity
-//@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 public abstract class Noticia {
 
     @Id

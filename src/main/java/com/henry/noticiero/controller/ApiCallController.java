@@ -16,17 +16,7 @@ public class ApiCallController {
     @Autowired
     ApiCallService apiCallService;
 
-  /*  @GetMapping
-    public WeatherResponse callAPI() {
-        try {
-            return apiCallService.callAPI();
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }*/
-
-    @GetMapping("/async")
+    @GetMapping
     public WeatherResponse callAPI() {
         try {
             return apiCallService.callAPI();
@@ -35,4 +25,14 @@ public class ApiCallController {
         }
         return null;
     }
+
+/*    @GetMapping("/async")
+    public WeatherResponse callAPI() {
+        try {
+            return apiCallService.callAPI();
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }*/
 }

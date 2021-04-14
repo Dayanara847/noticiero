@@ -24,11 +24,6 @@ public class WriterController {
     @Autowired
     private WriterToWriterDTOConvert writerToWriterDTOConvert;
 
- /*   @GetMapping("/{id}")
-    public Writer getWriter(@PathVariable Integer id) {
-        return writerService.getWriter(id);
-    }*/
-
     @GetMapping("/{id}")
     public WriterDTO getWriter(@PathVariable Integer id) {
         return conversionService.convert(writerService.getWriter(id), WriterDTO.class);
